@@ -1,0 +1,14 @@
+title: "Locus Diagnostics"
+description: "diagnostics for things like a Roborock (hopefully)."
+ha_release: 2026.6
+ha_category: "Other"
+ha_platforms:
+  - vacuum
+ha_iot_class: "Cloud Polling"
+ha_quality_scale: bronze
+ha_config_flow: true
+ha_codeowners:
+  - "@qtbnmn-bit"
+  - "@Co-Der16"
+ha_domain: locus
+ha_integration_type: service

@@ -1034,6 +1034,7 @@ CLAUDE.md @home-assistant/core
 /tests/components/local_todo/ @allenporter
 /homeassistant/components/lock/ @home-assistant/core
 /tests/components/lock/ @home-assistant/core
+/homeassistant/components/locus/ @vacpage @Co-Der16
 /homeassistant/components/logbook/ @home-assistant/core
 /tests/components/logbook/ @home-assistant/core
 /homeassistant/components/logger/ @home-assistant/core

@@ -429,6 +429,7 @@ FLOWS = {
         "local_ip",
         "local_todo",
         "locative",
+        "locus",
         "lojack",
         "london_underground",
         "lookin",
