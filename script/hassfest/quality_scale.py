@@ -542,6 +542,7 @@ INTEGRATIONS_WITHOUT_QUALITY_SCALE_FILE = [
     "local_todo",
     "location",
     "locative",
+    "locus",
     "logi_circle",
     "london_air",
     "london_underground",
