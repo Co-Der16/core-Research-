@@ -58,9 +58,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 new_state.state,
             )
 
-    target_entities = hass.states.async_entity_ids(
-        "light"
-    ) + hass.states.async_entity_ids("switch")
+    target_entities = (
+        hass.states.async_entity_ids("light")
+        + hass.states.async_entity_ids("switch")
+        + hass.states.async_entity_ids("sensor")
+        + hass.states.async_entity_ids("vacuum")
+    )
     async_track_state_change_event(hass, target_entities, monitor_matter_stream)
 
     return True
