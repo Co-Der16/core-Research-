@@ -4,7 +4,7 @@
   "codeowners": ["@qtbnmn-bit", "@Co-Der16"],
   "config_flow": true,
   "dependencies":["matter"],
-  "documentation": "https://www.home-assistant.io/integrations/locus",
+  "documentation": "https://github.com/home-assistant/core/blob/dev/config/custom_components/locus/README.md",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "version":"1.0.0"

@@ -1,0 +1,8 @@
+# Services Locus provides or smt
+dock:
+  name: Dock
+  description: Returns a vacuum to a dock
+  target:
+    entity:
+      integration: virtual
+      domain: vacuum
