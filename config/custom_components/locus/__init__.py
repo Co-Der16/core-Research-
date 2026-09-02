@@ -31,7 +31,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the component from a UI configuration entry."""
     # This prepares Home Assistant's memory space for your custom entities
     hass.data.setdefault(DOMAIN, {})
-    _logger.info("test 2 to see if it prints to log")
 
     @callback
     def monitor_matter_stream(event: Event):
