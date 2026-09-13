@@ -1,8 +1,9 @@
 {
-    "entity":{
-        "vacuum":{
-            "firstroborock":{
-                "name":"First Roborock"
+    "config":{
+        "step":{
+            "user":{
+                "title": "Locus Database Registration",
+                "description": "Do you want to set up the Locus Error Database? This will load the internal error dictionary for searching."
             }
         }
     }

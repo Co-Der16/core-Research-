@@ -7,11 +7,6 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.helpers.selector import (
-    NumberSelector,
-    NumberSelectorConfig,
-    NumberSelectorMode,
-)
 
 from .const import DOMAIN
 
@@ -53,48 +48,18 @@ class DirectoryConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle the initial user setup step."""
 
-        if user_input is not None:
-            if "user_input" not in self.context:
-                self.context["user_input"] = {}
+        if self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
 
-            self.context["user_input"].update(user_input)
-            if user_input.get("vacuum"):
-                return await self.async_step_vacuum_options()
-            return self.async_create_entry(
-                title=f"Locus ({user_input.get('vacuum')})",
-                data=user_input,
+        # 2. Show a simple confirmation button if user_input is empty
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user",
+                data_schema=vol.Schema(
+                    {}
+                ),  # Empty schema = no text fields, just a "Submit" prompt
             )
-
-        # Build the form schema using the selector helper; selector expects
-        # a list of option dicts with `value`/`label` keys.
-        data_schema = vol.Schema(
-            {
-                vol.Optional("friendly_name", default="Locus"): str,
-                vol.Optional("vacuum", default=False): bool,
-            }
-        )
-        return self.async_show_form(
-            step_id="user",
-            data_schema=data_schema,
-        )
-
-    async def async_step_vacuum_options(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Options for if the user selects that they are using Locus with a vacuum."""
-        if user_input is not None:
-            self.context["user_input"]["vacuum_options"] = user_input
-            return self.async_create_entry(title="Locus", data=self.context)
-        data_schema_vacuum = vol.Schema(
-            {
-                vol.Optional("auto_dock"): bool,
-                vol.Optional("auto_dock percent"): NumberSelector(
-                    NumberSelectorConfig(
-                        min=1, max=100, step=1, mode=NumberSelectorMode.SLIDER
-                    )
-                ),
-            }
-        )
-        return self.async_show_form(
-            step_id="vacuum_options", data_schema=data_schema_vacuum
+        return self.async_create_entry(
+            title="Locus Errors Database",
+            data={},  # Keep this empty since your database file is packaged locally
         )

@@ -6,3 +6,34 @@ dock:
     entity:
       integration: virtual
       domain: vacuum
+search_errors:
+  name: Search Locus Database
+  description: Searches the Locus database for errors and returns the errors found
+
+  response:
+    optional: false
+
+  fields:
+    query:
+      name: Search Query
+      description: The error code or keyword you want to search for (e.g., ERR_001, Low Battery).
+      required: true
+      selector:
+        text:
+          type: text
+    device_type:
+      name: Device Type Filter
+      description: Optional filter to narrow down results to a specific type of hardware.
+      required: false
+      selector:
+        select:
+          options:
+            - label: All Devices
+              value: ""
+            - label: Robot Vacuum
+              value: "robot_vacuum"
+            - label: Thermostat
+              value: "thermostat"
+            - label: Light
+              value: "light"
+          mode: dropdown
