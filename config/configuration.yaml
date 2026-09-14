@@ -1,0 +1,121 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes:
+    happy:
+      primary-color: pink
+      text-primary-color: purple
+    sad:
+      primary-color: steelblue
+      modes:
+        dark:
+          secondary-text-color: slategray
+    day_and_night:
+      primary-color: coral
+      modes:
+        light:
+          secondary-text-color: olive
+        dark:
+          secondary-text-color: slategray
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+logger:
+  default: info
+  logs:
+    homeassistant.components.cloud: debug
+input_number:
+  vacuum_error_id:
+    name: "error_id"
+    min: 0
+    max: 10
+    step: 1
+    icon: "mdi:alert-circle"
+  vacuum_battery:
+    name: "Vacuum Battery"
+    min: 0
+    max: 100
+    step: 1
+virtual:
+template:
+  - vacuum:
+      - name: "Virtual Robot Vacuum"
+        unique_id: "virtual_robot_vacuum_001"
+        state: >-
+          {% if is_state('switch.vacuum_error_trigger', 'on') %}
+            error
+          {% else %}
+            {{ states('sensor.virtual_vacuum_state') }}
+          {% endif %}
+        attributes:
+          fault_reason: >-
+            {% if is_state('switch.vacuum_error_trigger', 'on') %}
+              vacuum stuck
+            {% else %}
+              none
+            {% endif %}
+          fault_text: >-
+            {% if is_state('switch.vacuum_error_trigger', 'on') %}
+              The vacuum is stuck and cannot continue cleaning.
+            {% else %}
+              none
+            {% endif %}
+          fault_fix: >-
+            {% if is_state('switch.vacuum_error_trigger', 'on') %}
+              Please check the vacuum and remove any obstacles.
+
+              [Click here for more information](https://www.home-assistant.io/integrations/vacuum/#fault-reasons)
+              [Click here to go to device](/?more-info-entity-id=vacuum.virtual_robot_vacuum)
+            {% else %}
+              none
+            {% endif %}
+          fault_id: >-
+            {% if is_state('switch.vacuum_error_trigger', 'on') %}
+              {{ states('input_number.vacuum_error_id') }}
+            {% else %}
+              0
+            {% endif %}
+          battery: "{{ states('input_number.vacuum_battery') }}"
+        start:
+          action: virtual.set
+          target:
+            entity_id: sensor.virtual_vacuum_state
+          data:
+            value: "cleaning"
+        return_to_base:
+          action: virtual.set
+          target:
+            entity_id: sensor.virtual_vacuum_state
+          data:
+            value: "docked"
+        stop:
+          action: virtual.set
+          target:
+            entity_id: sensor.virtual_vacuum_state
+          data:
+            value: "idle"
+  - sensor:
+      - name: "Vacuum Battery Level"
+        unique_id: vacuum_battery_level_sensor
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        state: "{{ states('input_number.vacuum_battery') }}"
+  - trigger:
+      - platform: event
+        event_type: trigger_locus_error_search
+    action:
+      - action: locus.search_errors
+        data:
+          query: "{{ trigger.event.data.query}}"
+        response_variable: search_results
+    sensor:
+      - name: "Locus Error Search Results"
+        unique_id: locus_error_search_results
+        state: "{{ trigger.event.data.query}}"
+        attributes:
+          results: "{{ search_results.errors }}"

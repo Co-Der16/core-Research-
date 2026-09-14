@@ -1,0 +1,374 @@
+[
+    {
+        "error_code": "kStuck",
+        "summary": "Robot Vacuum Stuck",
+        "device_type": "robot_vacuum",
+        "category": "Navigation",
+        "description":"The robot vacuum is unable to move because it is trapped or blocked.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Remove any obstacles around the robot vacuum.",
+            "Place the robot on a clear, level surface.",
+            "Restart the cleaning cycle after the obstruction is removed."
+        ]
+    },
+    {
+        "error_code": "kLowBattery",
+        "summary": "Low Battery",
+        "device_type": "robot_vacuum",
+        "category": "Power",
+        "description":
+            "The battery charge is too low for the robot vacuum to continue operating."
+        ,
+        "severity": "warning",
+        "fix_type": "automatic",
+        "automatic_fix": "Send robot vacuum back to its charging dock.",
+        "recommended_fixes": [
+            "Return the robot vacuum to its charging dock.",
+            "Allow the battery to recharge before resuming cleaning.",
+            "Check that the charging dock has power if charging does not begin."
+        ]
+    },
+    {
+        "error_code": "kWaterTankEmpty",
+        "summary": "Water Tank Empty",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description":
+            "The water tank is empty and the robot vacuum cannot continue mopping."
+        ,
+        "severity": "warning",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Refill the water tank.",
+            "Ensure the tank is properly installed.",
+            "Resume the mopping cycle once the tank has been refilled."
+        ]
+    },
+    {
+        "error_code": "kUnableToStartOrResume",
+        "summary": "Unable to Start or Resume",
+        "device_type": "robot_vacuum",
+        "category": "Device State",
+        "description":
+            "The robot vacuum cannot start or continue its current cleaning task."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check that the robot vacuum is ready to operate.",
+            "Check for any active errors preventing the cleaning task.",
+            "Restart the cleaning task after resolving the issue."
+        ]
+    },
+    {
+        "error_code": "kUnableToCompleteOperation",
+        "summary": "Unable to Complete Operation",
+        "device_type": "robot_vacuum",
+        "category": "Device State",
+        "description":
+            "The robot vacuum started an operation but could not finish it successfully."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check the robot vacuum for any active problems.",
+            "Resolve any obstruction or condition preventing the operation.",
+            "Restart the operation after resolving the issue."
+        ]
+    },
+    {
+        "error_code": "kCommandInvalidInState",
+        "summary": "Command Invalid in Current State",
+        "device_type": "robot_vacuum",
+        "category": "Device State",
+        "description":
+            "The requested command cannot be performed because the robot vacuum \nis currently in an incompatible state."
+        ,
+        "severity": "error",
+        "fix_type": "automatic",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Wait for the current robot operation to finish.",
+            "Check the current state of the robot vacuum.",
+            "Try the command again when the robot is ready."
+        ]
+    },
+    {
+        "error_code": "kFailedToFindChargingDock",
+        "summary": "Failed to Find Charging Dock",
+        "device_type": "robot_vacuum",
+        "category": "Navigation",
+        "description":
+            "The robot vacuum cannot locate its charging dock to recharge."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Make sure the charging dock is accessible.",
+            "Check that the charging dock has power.",
+            "Place the robot vacuum near the charging dock and try again."
+        ]
+    },
+    {
+        "error_code": "kDustBinMissing",
+        "summary": "Dust Bin Missing",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The dust bin has been removed or is not properly installed.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Install the dust bin.",
+            "Make sure the dust bin is properly seated.",
+            "Restart the cleaning operation."
+        ]
+    },
+    {
+        "error_code": "kDustBinFull",
+        "summary": "Dust Bin Full",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The dust bin has reached its maximum capacity.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Empty the dust bin.",
+            "Reinstall the dust bin properly.",
+            "Resume cleaning after the dust bin has been emptied."
+        ]
+    },
+    {
+        "error_code": "kWaterTankMissing",
+        "summary": "Water Tank Missing",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The water tank is not installed.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Install the water tank.",
+            "Make sure the tank is properly seated.",
+            "Resume mopping after installing the tank."
+        ]
+    },
+    {
+        "error_code": "kWaterTankLidOpen",
+        "summary": "Water Tank Lid Open",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The water tank lid has not been closed properly.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Close the water tank lid properly.",
+            "Make sure the lid is securely latched.",
+            "Resume mopping after closing the lid."
+        ]
+    },
+    {
+        "error_code": "kMopCleaningPadMissing",
+        "summary": "Mop Cleaning Pad Missing",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The mop cleaning pad is missing or not attached correctly.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Attach the mop cleaning pad.",
+            "Make sure the pad is installed correctly.",
+            "Resume mopping after installing the pad."
+        ]
+    },
+    {
+        "error_code": "kCannotReachTargetArea",
+        "summary": "Cannot Reach Target Area",
+        "device_type": "robot_vacuum",
+        "category": "Navigation",
+        "description":
+            "The robot vacuum cannot access the area it was instructed to clean."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check for obstacles blocking the robot's path.",
+            "Make sure the target area is accessible.",
+            "Clear the path and try the cleaning task again."
+        ]
+    },
+    {
+        "error_code": "kDirtyWaterTankFull",
+        "summary": "Dirty Water Tank Full",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The dirty-water tank has reached capacity.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Empty the dirty-water tank.",
+            "Reinstall the tank properly.",
+            "Resume mopping after emptying the tank."
+        ]
+    },
+    {
+        "error_code": "kDirtyWaterTankMissing",
+        "summary": "Dirty Water Tank Missing",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description": "The dirty-water tank is missing or not installed.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Install the dirty-water tank.",
+            "Make sure the tank is properly seated.",
+            "Resume mopping after installing the tank."
+        ]
+    },
+    {
+        "error_code": "kWheelsJammed",
+        "summary": "Wheels Jammed",
+        "device_type": "robot_vacuum",
+        "category": "Mobility",
+        "description":
+            "One or more wheels cannot rotate normally because they are blocked."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check the wheels for debris or obstructions.",
+            "Remove anything preventing the wheels from rotating.",
+            "Try the cleaning operation again after clearing the wheels."
+        ]
+    },
+    {
+        "error_code": "kBrushJammed",
+        "summary": "Brush Jammed",
+        "device_type": "robot_vacuum",
+        "category": "Maintenance",
+        "description":
+            "The main cleaning brush cannot rotate because it is obstructed."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check the main brush for hair, debris, or other obstructions.",
+            "Remove anything preventing the brush from rotating.",
+            "Resume cleaning after clearing the brush."
+        ]
+    },
+    {
+        "error_code": "kNavigationSensorObscured",
+        "summary": "Navigation Sensor Obscured",
+        "device_type": "robot_vacuum",
+        "category": "Sensors",
+        "description":
+            "A navigation sensor is blocked or covered, preventing accurate navigation."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Check the navigation sensors for dirt or obstructions.",
+            "Clean the affected sensor.",
+            "Resume the cleaning operation after clearing the sensor."
+        ]
+    },
+    {
+        "error_code": "kRoomSensorFail",
+        "summary": "Room Temperature Sensor Failure",
+        "device_type": "thermostat",
+        "category": "Sensor Failure",
+        "description":
+            "The indoor room temperature sensor is failing and cannot accurately measure the room temperature."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Inspect the thermostat for visible damage.",
+            "Check that the sensor is properly connected.",
+            "Replace or service the thermostat if the issue persists."
+        ]
+    },
+    {
+        "error_code": "kFanFail",
+        "summary": "HVAC Fan Failure",
+        "device_type": "thermostat",
+        "category": "Airflow",
+        "description":
+            "The HVAC fan is failing or not operating correctly, affecting airflow."
+        ,
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Verify that the HVAC system has power.",
+            "Inspect the fan for visible obstructions.",
+            "Contact an HVAC technician if the fan does not operate."
+        ]
+    },
+    {
+        "error_code": "kCompressorFail",
+        "summary": "Compressor Failure",
+        "device_type": "thermostat",
+        "category": "Cooling / Heating",
+        "description":
+            "The HVAC compressor is failing or not operating correctly, preventing normal heating or cooling.",
+        "severity": "critical",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Turn off the HVAC system to prevent further damage.",
+            "Check the system for error indicators.",
+            "Contact a qualified HVAC technician for repair."
+        ]
+    },
+    {
+        "error_code": "kOutdoorSensorFail",
+        "summary": "Outdoor Temperature Sensor Failure",
+        "device_type": "thermostat",
+        "category": "Sensor Failure",
+        "description": "The outdoor temperature sensor is failing and cannot provide reliable external temperature data.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Inspect the outdoor temperature sensor for visible damage.",
+            "Check that the sensor is properly connected.",
+            "Replace or service the sensor if the issue persists."
+        ]
+    },
+    {
+        "error_code": "kCoilSensorFail",
+        "summary": "Coil Temperature Sensor Failure",
+        "device_type": "thermostat",
+        "category": "Sensor Failure",
+        "description":
+            "The coil temperature sensor is failing and cannot provide reliable temperature data.",
+        "severity": "error",
+        "fix_type": "manual",
+        "automatic_fix": "",
+        "recommended_fixes": [
+            "Inspect the coil temperature sensor for visible damage.",
+            "Check that the sensor is properly connected.",
+            "Replace or service the sensor if the issue persists."
+        ]
+    }
+
+]

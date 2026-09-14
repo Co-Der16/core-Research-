@@ -24,7 +24,7 @@ CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
 _logger = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.NUMBER]
+PLATFORMS: list[Platform] = []
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
