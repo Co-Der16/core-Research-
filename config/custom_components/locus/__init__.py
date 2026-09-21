@@ -19,12 +19,31 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.typing import ConfigType
 
+from .matter_errors import matter_error_to_locus_code
+
 DOMAIN = "locus"
 CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
 _logger = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = []
+
+
+def get_locus_error_from_matter(
+    matter_error: str,
+    db: list[dict],
+) -> dict | None:
+    """Convert a Matter error into its Locus database entry."""
+    locus_code = matter_error_to_locus_code(matter_error)
+
+    if locus_code is None:
+        return None
+
+    for error in db:
+        if error["error_code"] == locus_code:
+            return error
+
+    return None
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -100,8 +119,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     database_data = await hass.async_add_executor_job(load_db)
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {"database": database_data}
+
     _logger.info(
-        "Locus error database loaded successfully with %d entries.", len(database_data)
+        "Locus error database loaded successfully with %d entries.",
+        len(database_data),
     )
 
     async def async_search_errors(call: ServiceCall) -> ServiceResponse:
@@ -112,6 +133,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         domain_data = hass.data.get(DOMAIN, {})
         entry_data = domain_data.get(entry.entry_id, {})
         db = entry_data.get("database")
+
         _logger.info(
             "Locus error database loaded successfully with %d entries. Searching with query %s",
             len(db),
@@ -121,28 +143,38 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         results = []
 
         for error in db:
-            # If a device filter is set, skip errors that don't match it
+            # If a device filter is set, skip errors that don't match
+            # device type.
             if device_filter and error["device_type"] != device_filter:
                 continue
-            # Match text against error_code, summary, or description
+
+            # Match text against error_code, summary, or description.
             if (
                 search_query in error["error_code"].lower()
                 or search_query in error["summary"].lower()
                 or search_query in error["description"].lower()
             ):
                 results.append(error)
+
         _logger.info(
-            "Search completed. Found %d matching errors for query '%s' with device filter '%s'.",
+            "Search completed. Found %d matching errors for query '%s' "
+            "with device filter '%s'.",
             len(results),
             search_query,
             device_filter,
         )
+
         persistent_notification.create(
             hass,
-            message=f"Search completed. Found {len(results)} matching errors for query '{search_query}' with device filter '{device_filter}'.",
+            message=(
+                f"Search completed. Found {len(results)} matching errors "
+                f"for query '{search_query}' with device filter "
+                f"'{device_filter}'."
+            ),
             title="Locus Error Search Results",
             notification_id=f"locus_search_results_{entry.entry_id}",
         )
+
         return {"errors": results}
 
     hass.services.async_register(
@@ -151,4 +183,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_search_errors,
         supports_response=True,
     )
+
     return True
