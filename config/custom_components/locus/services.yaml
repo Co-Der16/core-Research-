@@ -6,6 +6,7 @@ dock:
     entity:
       integration: virtual
       domain: vacuum
+
 search_errors:
   name: Search Locus Database
   description: Searches the Locus database for errors and returns the errors found
@@ -47,11 +48,11 @@ search_errors:
         select:
           options:
             - label: Good
-              value: true
+              value: "true"
             - label: Unknown
               value: "unknown"
             - label: Bad
-              value: false
+              value: "false"
           mode: dropdown
 
     hass_status:
@@ -62,11 +63,11 @@ search_errors:
         select:
           options:
             - label: Good
-              value: true
+              value: "true"
             - label: Unknown
               value: "unknown"
             - label: Bad
-              value: false
+              value: "false"
           mode: dropdown
 
     phys_status:
@@ -77,11 +78,11 @@ search_errors:
         select:
           options:
             - label: Good
-              value: true
+              value: "true"
             - label: Unknown
               value: "unknown"
             - label: Bad
-              value: false
+              value: "false"
           mode: dropdown
 
     battery_status:
@@ -94,5 +95,5 @@ search_errors:
             - label: Unknown
               value: "unknown"
             - label: Bad
-              value: false
+              value: "false"
           mode: dropdown

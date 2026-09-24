@@ -47,10 +47,102 @@ def get_locus_error_from_matter(
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Locus component from YAML (legacy support)."""
-    _logger.debug(
-        "Locus component successfully registered in the backend. writing extra to test if it works"
+    """Set up the Locus component."""
+    db_path = Path(__file__).parent / "errors_db.json"
+
+    def load_db():
+        with Path.open(db_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    database_data = await hass.async_add_executor_job(load_db)
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN]["database"] = database_data
+
+    _logger.info(
+        "Locus error database loaded successfully with %d entries.",
+        len(database_data),
     )
+
+    async def async_search_errors(call: ServiceCall) -> ServiceResponse:
+        """Search Locus database for errors."""
+        search_query = call.data.get("query", "").lower()
+        device_filter = call.data.get("device_type", "").lower()
+
+        status_filters = {}
+
+        for status_name in (
+            "wifi_status",
+            "hass_status",
+            "phys_status",
+            "battery_status",
+        ):
+            requested_status = call.data.get(status_name)
+
+            if requested_status == "true":
+                requested_status = True
+            elif requested_status == "false":
+                requested_status = False
+
+            status_filters[status_name] = requested_status
+        db = hass.data[DOMAIN]["database"]
+
+        results = []
+
+        for error in db:
+            if device_filter and error["device_type"] != device_filter:
+                continue
+
+            if search_query and not (
+                search_query in error["error_code"].lower()
+                or search_query in error["summary"].lower()
+                or search_query in error["description"].lower()
+            ):
+                continue
+
+            statuses = error.get("statuses", {})
+            status_mismatch = False
+
+            for status_name, requested_status in status_filters.items():
+                if requested_status is not None:
+                    allowed_statuses = statuses.get(status_name, [])
+
+                    if requested_status not in allowed_statuses:
+                        status_mismatch = True
+                        break
+
+            if status_mismatch:
+                continue
+
+            results.append(error)
+
+        _logger.info(
+            "Search completed. Found %d matching errors for query '%s' "
+            "with device filter '%s'.",
+            len(results),
+            search_query,
+            device_filter,
+        )
+
+        persistent_notification.create(
+            hass,
+            message=(
+                f"Search completed. Found {len(results)} matching errors "
+                f"for query '{search_query}' with device filter "
+                f"'{device_filter}'."
+            ),
+            title="Locus Error Search Results",
+            notification_id="locus_search_results",
+        )
+
+        return {"errors": results}
+
+    hass.services.async_register(
+        DOMAIN,
+        "search_errors",
+        async_search_errors,
+        supports_response=True,
+    )
+
     return True
 
 
@@ -108,104 +200,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     target_entities = hass.states.async_entity_ids("vacuum")
     async_track_state_change_event(hass, target_entities, error_notifier)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    locus_error_db = Path(__file__).parent
-    db_path = Path(locus_error_db) / "errors_db.json"
-
-    def load_db():
-        with Path.open(db_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    database_data = await hass.async_add_executor_job(load_db)
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {"database": database_data}
-
-    _logger.info(
-        "Locus error database loaded successfully with %d entries.",
-        len(database_data),
-    )
-
-    async def async_search_errors(call: ServiceCall) -> ServiceResponse:
-        """Searches Locus database for errors. Mainly AI made."""
-        search_query = call.data.get("query", "").lower()
-        device_filter = call.data.get("device_type", "").lower()
-
-        status_filters = {
-            "wifi_status": call.data.get("wifi_status"),
-            "hass_status": call.data.get("hass_status"),
-            "phys_status": call.data.get("phys_status"),
-            "battery_status": call.data.get("battery_status"),
-        }
-
-        domain_data = hass.data.get(DOMAIN, {})
-        entry_data = domain_data.get(entry.entry_id, {})
-        db = entry_data.get("database")
-
-        _logger.info(
-            "Locus error database loaded successfully with %d entries. Searching with query %s",
-            len(db),
-            search_query,
-        )
-
-        results = []
-
-        for error in db:
-            # If a device filter is set, skip errors that don't match
-            # device type.
-            if device_filter and error["device_type"] != device_filter:
-                continue
-
-            # Match text against error_code, summary, or description.
-            if search_query and not (
-                search_query in error["error_code"].lower()
-                or search_query in error["summary"].lower()
-                or search_query in error["description"].lower()
-            ):
-                continue
-
-            # Filter by status when a status was provided.
-            statuses = error.get("statuses", {})
-
-            status_mismatch = False
-
-            for status_name, requested_status in status_filters.items():
-                if requested_status is not None:
-                    allowed_statuses = statuses.get(status_name, [])
-
-                    if requested_status not in allowed_statuses:
-                        status_mismatch = True
-                        break
-
-            if status_mismatch:
-                continue
-
-            results.append(error)
-        _logger.info(
-            "Search completed. Found %d matching errors for query '%s' "
-            "with device filter '%s'.",
-            len(results),
-            search_query,
-            device_filter,
-        )
-
-        persistent_notification.create(
-            hass,
-            message=(
-                f"Search completed. Found {len(results)} matching errors "
-                f"for query '{search_query}' with device filter "
-                f"'{device_filter}'."
-            ),
-            title="Locus Error Search Results",
-            notification_id=f"locus_search_results_{entry.entry_id}",
-        )
-
-        return {"errors": results}
-
-    hass.services.async_register(
-        DOMAIN,
-        "search_errors",
-        async_search_errors,
-        supports_response=True,
-    )
 
     return True
