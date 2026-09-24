@@ -130,6 +130,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         search_query = call.data.get("query", "").lower()
         device_filter = call.data.get("device_type", "").lower()
 
+        status_filters = {
+            "wifi_status": call.data.get("wifi_status"),
+            "hass_status": call.data.get("hass_status"),
+            "phys_status": call.data.get("phys_status"),
+            "battery_status": call.data.get("battery_status"),
+        }
+
         domain_data = hass.data.get(DOMAIN, {})
         entry_data = domain_data.get(entry.entry_id, {})
         db = entry_data.get("database")
@@ -149,13 +156,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 continue
 
             # Match text against error_code, summary, or description.
-            if (
+            if search_query and not (
                 search_query in error["error_code"].lower()
                 or search_query in error["summary"].lower()
                 or search_query in error["description"].lower()
             ):
-                results.append(error)
+                continue
 
+            # Filter by status when a status was provided.
+            statuses = error.get("statuses", {})
+
+            status_mismatch = False
+
+            for status_name, requested_status in status_filters.items():
+                if requested_status is not None:
+                    allowed_statuses = statuses.get(status_name, [])
+
+                    if requested_status not in allowed_statuses:
+                        status_mismatch = True
+                        break
+
+            if status_mismatch:
+                continue
+
+            results.append(error)
         _logger.info(
             "Search completed. Found %d matching errors for query '%s' "
             "with device filter '%s'.",

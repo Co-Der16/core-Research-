@@ -21,6 +21,7 @@ search_errors:
       selector:
         text:
           type: text
+
     device_type:
       name: Device Type Filter
       description: Optional filter to narrow down results to a specific type of hardware.
@@ -36,4 +37,62 @@ search_errors:
               value: "thermostat"
             - label: Light
               value: "light"
+          mode: dropdown
+
+    wifi_status:
+      name: Wi-Fi Status
+      description: Filter errors based on the current Wi-Fi status.
+      required: false
+      selector:
+        select:
+          options:
+            - label: Good
+              value: true
+            - label: Unknown
+              value: "unknown"
+            - label: Bad
+              value: false
+          mode: dropdown
+
+    hass_status:
+      name: Home Assistant Status
+      description: Filter errors based on the current Home Assistant status.
+      required: false
+      selector:
+        select:
+          options:
+            - label: Good
+              value: true
+            - label: Unknown
+              value: "unknown"
+            - label: Bad
+              value: false
+          mode: dropdown
+
+    phys_status:
+      name: Physical Status
+      description: Filter errors based on the physical condition of the device.
+      required: false
+      selector:
+        select:
+          options:
+            - label: Good
+              value: true
+            - label: Unknown
+              value: "unknown"
+            - label: Bad
+              value: false
+          mode: dropdown
+
+    battery_status:
+      name: Battery Status
+      description: Filter errors based on the battery or device status.
+      required: false
+      selector:
+        select:
+          options:
+            - label: Unknown
+              value: "unknown"
+            - label: Bad
+              value: false
           mode: dropdown
