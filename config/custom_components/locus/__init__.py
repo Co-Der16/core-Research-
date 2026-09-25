@@ -1,13 +1,17 @@
-"""The Locus integration is a custom component for Home Assistant that monitors the internal event bus for state changes and logs them, particularly focusing on entities related to the Matter integration. It provides a configuration flow for setting up the integration through the Home Assistant UI, allowing users to input their credentials and configure SSL options. The integration also supports legacy YAML configuration."""
+"""The Locus integration is a custom component for Home Assistant that monitors the internal event bus for state changes and logs them, particularly focusing on entities related to the Matter integration.
+
+It provides a configuration flow for setting up the integration through the Home Assistant UI, allowing users to input their credentials and configure SSL options. The integration also supports legacy YAML configuration.
+"""
 
 import json
 import logging
 from pathlib import Path
 
 from homeassistant.components import persistent_notification
-from homeassistant.config_entries import ConfigEntry as ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import (
+    EVENT_STATE_CHANGED,
     Event,
     HomeAssistant,
     ServiceCall,
@@ -16,7 +20,6 @@ from homeassistant.core import (
 )
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.typing import ConfigType
 
 from .matter_errors import matter_error_to_locus_code
@@ -55,6 +58,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return json.load(f)
 
     database_data = await hass.async_add_executor_job(load_db)
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["database"] = database_data
 
@@ -84,6 +88,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 requested_status = False
 
             status_filters[status_name] = requested_status
+
         db = hass.data[DOMAIN]["database"]
 
         results = []
@@ -143,62 +148,112 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         supports_response=True,
     )
 
-    return True
-
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up the component from a UI configuration entry."""
-    # This prepares Home Assistant's memory space for your custom entities
-    hass.data.setdefault(DOMAIN, {})
-
     @callback
-    def error_notifier(event: Event):
-        """Queries the internal event bus for state changes and logs them."""
+    def state_listener(event: Event):
+        """Handle state changes relevant to Locus."""
         entity_id = event.data.get("entity_id")
         new_state = event.data.get("new_state")
 
-        _logger.log(logging.INFO, "some state thing happened: %s", event.data)
-
-        if not new_state:
+        if not entity_id or not new_state:
             return
 
         ent_reg = er.async_get(hass)
         entity_entry = ent_reg.async_get(entity_id)
-        device_id = (
-            entity_entry.unique_id
-            if entity_entry
-            else entity_entry.device_id
-            if entity_entry
-            else "unknown"
-        )
 
-        _logger.info(
-            "State change in '%s' (device_id: %s): is now %s",
-            entity_id,
-            device_id,
-            new_state.state,
-        )
+        unique_id = ""
+        if entity_entry and entity_entry.unique_id:
+            unique_id = entity_entry.unique_id
 
-        # auto_dock()
-        if new_state.state == "error":
-            _logger.error(
-                "Error state detected for '%s' (device_id: %s, error = %s) %s, fix is %s, id is %s",
+        #
+        # PART 1: Normal vacuum errors
+        #
+        if entity_id.startswith("vacuum.") and new_state.state == "error":
+            _logger.info(
+                "Locus detected vacuum error state: %s",
                 entity_id,
-                device_id,
-                new_state.attributes.get("fault_reason", "No fault reason provided"),
-                new_state.attributes.get("fault_text", "No fault text provided"),
-                new_state.attributes.get("fault_fix", "No fix provided"),
-                new_state.attributes.get("fault_id", "No fault ID provided"),
             )
+
             persistent_notification.create(
                 hass,
-                message=f"Device ID: {device_id}\nError: {new_state.attributes.get('fault_reason', 'No fault reason provided')}\nDetails: {new_state.attributes.get('fault_text', 'No fault text provided')}\nFix: {new_state.attributes.get('fault_fix', 'No fix provided')}\nFault ID: {new_state.attributes.get('fault_id', 'No fault ID provided')}",
-                title=f"Error detected in {entity_id}",
-                notification_id=f"locus_error_{entity_id}",
+                message=f"Vacuum {entity_id} entered error state.",
+                title="Locus Vacuum Error",
+                notification_id=f"locus_vacuum_{entity_id}",
             )
 
-    target_entities = hass.states.async_entity_ids("vacuum")
-    async_track_state_change_event(hass, target_entities, error_notifier)
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+            _logger.error(
+                "Vacuum error detected: %s",
+                entity_id,
+            )
+
+        #
+        # PART 2: Matter robot vacuum operational errors
+        #
+        if "RvcOperationalStateOperationalError" not in unique_id:
+            return
+
+        matter_error = new_state.state
+
+        _logger.info(
+            "Matter error sensor updated: %s -> %s",
+            entity_id,
+            matter_error,
+        )
+
+        if matter_error in ("no_error", "unknown"):
+            return
+
+        db = hass.data[DOMAIN]["database"]
+
+        locus_error = get_locus_error_from_matter(
+            matter_error,
+            db,
+        )
+
+        if not locus_error:
+            _logger.warning(
+                "No Locus entry found for Matter error: %s",
+                matter_error,
+            )
+            return
+
+        _logger.error(
+            "Mapped Matter error %s -> %s",
+            matter_error,
+            locus_error["error_code"],
+        )
+
+        persistent_notification.create(
+            hass,
+            message=(
+                f"Error: {locus_error['summary']}\n\n"
+                f"Details: {locus_error['description']}\n\n"
+                f"Fixes:\n"
+                f"{chr(10).join(locus_error['recommended_fixes'])}"
+            ),
+            title=f"Locus: {locus_error['summary']}",
+            notification_id=f"locus_matter_{entity_id}",
+        )
+
+    hass.bus.async_listen(
+        EVENT_STATE_CHANGED,
+        state_listener,
+    )
+
+    _logger.info("Locus state listener registered.")
+
+    return True
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+) -> bool:
+    """Set up the component from a UI configuration entry."""
+    hass.data.setdefault(DOMAIN, {})
+
+    await hass.config_entries.async_forward_entry_setups(
+        entry,
+        PLATFORMS,
+    )
 
     return True
